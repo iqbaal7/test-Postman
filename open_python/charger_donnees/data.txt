@@ -1,0 +1,4 @@
+Nom,Age,Ville
+John,25,New York
+Alice,32,Paris
+Michael,40,London
