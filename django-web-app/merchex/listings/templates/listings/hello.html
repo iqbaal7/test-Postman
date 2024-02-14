@@ -1,0 +1,12 @@
+{% load static %}
+<title>Merchex</title>
+<link rel="stylesheet" href="{% static 'listings/styles.css' %}" />
+
+
+<h1>Hello Django !</h1>
+        <p>Mes groupes préférés sont :<p>
+        <ul>
+            {% for band in bands %}
+                <li>{{ band.name}}</li>
+            {%endfor %}
+         </ul>
