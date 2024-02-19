@@ -1,19 +1,48 @@
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.urls import reverse
 from listings.models import Band
 from django.core.mail import send_mail
 from listings.forms import BandForm, ContactUsForm
 from django.shortcuts import redirect
+from django.http import HttpResponseRedirect
 
+
+def band_delete(request, id):
+    band = Band.objects.get(id=id)  # nécessaire pour GET et pour POST
+
+    if request.method == 'POST':
+        band.delete()
+        return HttpResponseRedirect(reverse('band-list'))
+
+    # pas besoin de « else » ici. Si c'est une demande GET, continuez simplement
+
+    return render(request,
+                    'listings/band_delete.html',
+                    {'band': band})
+
+def band_update(request, id):
+    band = Band.objects.get(id=id)
+
+    if request.method == 'POST':
+        form = BandForm(request.POST, instance=band)
+        if form.is_valid():
+            # mettre à jour le groupe existant dans la base de données
+            form.save()
+            # rediriger vers la page détaillée du groupe que nous venons de mettre à jour
+            return redirect('band-detail', band.id)
+    else:
+        form = BandForm(instance=band)
+
+    return render(request,
+                'listings/band_update.html',
+                {'form': form})
 
 def band_create(request):
     if request.method == 'POST':
         form = BandForm(request.POST)
         if form.is_valid():
-            # créer une nouvelle « Band » et la sauvegarder dans la db
             band = form.save()
-            # redirige vers la page de détail du groupe que nous venons de créer
-            # nous pouvons fournir les arguments du motif url comme arguments à la fonction de redirection
             return redirect('band-detail', band.id)
 
     else:
@@ -23,7 +52,6 @@ def band_create(request):
 
 def contact(request):
     if request.method == 'POST':
-        # créer une instance de notre formulaire et le remplir avec les données POST
         form = ContactUsForm(request.POST)
 
         if form.is_valid():
@@ -39,12 +67,6 @@ def contact(request):
         form = ContactUsForm()
 
     return render(request, 'listings/contact.html', {'form': form})
-
-
-def hello(request):
-    bands = Band.objects.all()
-    return render(request, 'listings\hello.html',
-                  context={"bands": bands})
 
 def band_list(request):  # renommer la fonction de vue
    bands = Band.objects.all()
